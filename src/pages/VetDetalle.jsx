@@ -1,12 +1,14 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Phone, Mail, Clock, Stethoscope, CheckCircle } from 'lucide-react'
-import { getVetById, solicitudes, getSolicitudById } from '../data'
+import { useAppData } from '../context/AppContext'
 import RequestCard from '../components/RequestCard'
 
 export default function VetDetalle() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const vet = getVetById(id)
+  const { veterinarias, solicitudes } = useAppData()
+
+  const vet = veterinarias.find((v) => v.id === Number(id))
 
   if (!vet) {
     return (
@@ -17,7 +19,7 @@ export default function VetDetalle() {
     )
   }
 
-  const solActivas = vet.solicitudesActivas
+  const solActivas = (vet.solicitudesActivas || [])
     .map((sid) => solicitudes.find((s) => s.id === sid))
     .filter(Boolean)
 
@@ -45,16 +47,22 @@ export default function VetDetalle() {
               </div>
             </div>
 
-            <p className="text-sm text-slate-600 leading-relaxed mb-5">{vet.descripcion}</p>
+            {vet.descripcion && (
+              <p className="text-sm text-slate-600 leading-relaxed mb-5">{vet.descripcion}</p>
+            )}
 
-            <h3 className="font-semibold text-slate-700 mb-2 text-sm">Servicios disponibles</h3>
-            <div className="flex flex-wrap gap-2 mb-5">
-              {vet.servicios.map((s) => (
-                <span key={s} className="px-3 py-1 bg-teal-50 text-teal-700 text-sm rounded-full border border-teal-200 font-medium">
-                  {s}
-                </span>
-              ))}
-            </div>
+            {vet.servicios.length > 0 && (
+              <>
+                <h3 className="font-semibold text-slate-700 mb-2 text-sm">Servicios disponibles</h3>
+                <div className="flex flex-wrap gap-2">
+                  {vet.servicios.map((s) => (
+                    <span key={s} className="px-3 py-1 bg-teal-50 text-teal-700 text-sm rounded-full border border-teal-200 font-medium">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -63,34 +71,37 @@ export default function VetDetalle() {
           <div className="space-y-2.5">
             <div className="flex items-start gap-2.5 text-sm">
               <MapPin size={15} className="text-slate-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-slate-700 font-medium">{vet.direccion}</p>
+              <p className="text-slate-700 font-medium">{vet.direccion}</p>
+            </div>
+            {vet.horarios && (
+              <div className="flex items-center gap-2.5 text-sm">
+                <Clock size={15} className="text-slate-400 flex-shrink-0" />
+                <p className="text-slate-600">{vet.horarios}</p>
               </div>
-            </div>
-            <div className="flex items-center gap-2.5 text-sm">
-              <Clock size={15} className="text-slate-400 flex-shrink-0" />
-              <p className="text-slate-600">{vet.horarios}</p>
-            </div>
+            )}
             <div className="flex items-center gap-2.5 text-sm">
               <Phone size={15} className="text-slate-400 flex-shrink-0" />
               <p className="text-slate-700 font-medium">{vet.telefono}</p>
             </div>
-            <div className="flex items-center gap-2.5 text-sm">
-              <Mail size={15} className="text-slate-400 flex-shrink-0" />
-              <p className="text-slate-600">{vet.email}</p>
-            </div>
+            {vet.email && (
+              <div className="flex items-center gap-2.5 text-sm">
+                <Mail size={15} className="text-slate-400 flex-shrink-0" />
+                <p className="text-slate-600">{vet.email}</p>
+              </div>
+            )}
           </div>
           <hr className="border-slate-100" />
           <a href={`tel:${vet.telefono}`} className="btn-primary w-full justify-center text-sm">
             <Phone size={14} /> Llamar ahora
           </a>
-          <a href={`mailto:${vet.email}`} className="btn-outline w-full justify-center text-sm">
-            <Mail size={14} /> Enviar email
-          </a>
+          {vet.email && (
+            <a href={`mailto:${vet.email}`} className="btn-outline w-full justify-center text-sm">
+              <Mail size={14} /> Enviar email
+            </a>
+          )}
         </div>
       </div>
 
-      {/* Solicitudes activas de esta vet */}
       {solActivas.length > 0 && (
         <div>
           <h2 className="text-xl font-bold text-slate-800 mb-1">

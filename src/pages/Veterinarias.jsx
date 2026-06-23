@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { Filter } from 'lucide-react'
-import { veterinarias } from '../data'
+import { useAppData } from '../context/AppContext'
 import VetCard from '../components/VetCard'
 
-const zonas = [...new Set(veterinarias.map((v) => v.zona))]
 const servicios = ['Banco de sangre', 'Transfusiones', 'Urgencias 24 hs', 'Especialista en felinos']
 
 export default function Veterinarias() {
+  const { veterinarias } = useAppData()
   const [filtroZona, setFiltroZona] = useState('todas')
   const [filtroServicio, setFiltroServicio] = useState('todos')
+
+  const zonas = [...new Set(veterinarias.map((v) => v.zona))]
 
   const filtradas = veterinarias.filter((v) => {
     if (filtroZona !== 'todas' && v.zona !== filtroZona) return false
