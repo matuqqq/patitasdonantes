@@ -1,18 +1,21 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Filter, Plus } from 'lucide-react'
-import { donantes } from '../data'
+import { useAppData } from '../context/AppContext'
 import DonorCard from '../components/DonorCard'
 
 export default function Donantes() {
+  const { donantes } = useAppData()
   const [busqueda, setBusqueda] = useState('')
   const [filtroEspecie, setFiltroEspecie] = useState('todas')
   const [filtroEstado, setFiltroEstado] = useState('todos')
   const [filtroSangre, setFiltroSangre] = useState('todos')
 
-  const tiposSangre = [...new Set(donantes.map((d) => d.tipoSangre))]
+  // Los donantes rechazados no forman parte de la red pública
+  const publicos = donantes.filter((d) => d.estado !== 'rechazada')
+  const tiposSangre = [...new Set(publicos.map((d) => d.tipoSangre))]
 
-  const filtrados = donantes.filter((d) => {
+  const filtrados = publicos.filter((d) => {
     const textoBusq = busqueda.toLowerCase()
     const coinBusq =
       !textoBusq ||
@@ -31,7 +34,7 @@ export default function Donantes() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Donantes registrados</h1>
-          <p className="text-slate-500 text-sm mt-1">{donantes.filter(d => d.estado === 'disponible').length} disponibles de {donantes.length} registrados</p>
+          <p className="text-slate-500 text-sm mt-1">{publicos.filter(d => d.estado === 'disponible').length} disponibles de {publicos.length} registrados</p>
         </div>
         <Link to="/donantes/registrar" className="btn-primary">
           <Plus size={16} /> Registrar mi mascota

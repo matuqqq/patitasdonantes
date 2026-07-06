@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, Droplets, AlertTriangle } from 'lucide-react'
-import { veterinarias, donantes, getCompatibleDonors } from '../data'
+import { getCompatibleDonors } from '../data'
+import { useAppData } from '../context/AppContext'
 import DonorCard from '../components/DonorCard'
 
 const STEPS = ['Mascota', 'Urgencia', 'Veterinaria', 'Confirmación']
@@ -9,14 +10,26 @@ const STEPS = ['Mascota', 'Urgencia', 'Veterinaria', 'Confirmación']
 const initial = {
   mascota: '', especie: 'perro', raza: '', edad: '', tipoSangre: '',
   urgencia: 'moderado', fechaNecesidad: '', cantidadML: '', descripcion: '',
-  veterinariaId: '', contacto: '', telefono: '',
+  veterinariaId: '', contacto: '', telefono: '', propietario: '',
 }
 
 export default function NuevaSolicitud() {
   const navigate = useNavigate()
+  const { veterinarias, donantes, addSolicitud } = useAppData()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState(initial)
   const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = () => {
+    addSolicitud({
+      ...form,
+      veterinariaId: Number(form.veterinariaId),
+      edad: form.edad ? Number(form.edad) : null,
+      cantidadML: form.cantidadML ? Number(form.cantidadML) : null,
+      propietario: form.propietario || form.contacto,
+    })
+    setSubmitted(true)
+  }
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -271,7 +284,7 @@ export default function NuevaSolicitud() {
             Siguiente <ArrowRight size={15} />
           </button>
         ) : (
-          <button onClick={() => setSubmitted(true)} className="btn-primary flex-1">
+          <button onClick={handleSubmit} className="btn-primary flex-1">
             <Droplets size={15} /> Publicar solicitud
           </button>
         )}

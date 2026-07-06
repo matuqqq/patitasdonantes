@@ -15,7 +15,7 @@ export default function AdminLogin() {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (login(email, password)) {
-      navigate('/admin/veterinarias')
+      navigate('/admin/donantes')
     } else {
       setError(true)
     }

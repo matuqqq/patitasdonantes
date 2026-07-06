@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Check, Heart } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Heart, Clock } from 'lucide-react'
+import { useAppData } from '../context/AppContext'
 
 const STEPS = ['Mascota', 'Salud', 'Dueño/a', 'Confirmación']
 
@@ -12,6 +13,7 @@ const initialForm = {
 
 export default function RegistrarDonante() {
   const navigate = useNavigate()
+  const { addDonante } = useAppData()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState(initialForm)
   const [submitted, setSubmitted] = useState(false)
@@ -29,24 +31,50 @@ export default function RegistrarDonante() {
     return true
   }
 
-  const handleSubmit = () => setSubmitted(true)
+  const handleSubmit = () => {
+    const tipoSangre =
+      form.tipoSangre && !form.tipoSangre.startsWith('No sé') ? form.tipoSangre : 'Sin determinar'
+    addDonante({
+      nombre: form.nombre,
+      especie: form.especie,
+      raza: form.raza,
+      edad: form.edad ? Number(form.edad) : null,
+      peso: form.peso ? Number(form.peso) : null,
+      sexo: form.sexo,
+      tipoSangre,
+      zona: form.ownerZona,
+      ciudad: 'Buenos Aires',
+      vacunado: form.vacunado,
+      desparasitado: form.desparasitado,
+      propietario: {
+        nombre: form.ownerNombre,
+        telefono: form.ownerTelefono,
+        email: form.ownerEmail,
+      },
+      descripcion:
+        `Postulación de ${form.nombre}. ` +
+        (form.enfermedades ? `Antecedentes: ${form.enfermedades}. ` : 'Sin antecedentes declarados. ') +
+        (form.medicacion ? `Medicación: ${form.medicacion}.` : 'Sin medicación actual.'),
+    })
+    setSubmitted(true)
+  }
 
   if (submitted) {
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
-        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Check size={36} className="text-emerald-600" />
+        <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Clock size={36} className="text-yellow-600" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">¡{form.nombre} ya es donante! 🐾</h1>
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">¡Postulación de {form.nombre} enviada! 🐾</h1>
         <p className="text-slate-500 mb-6">
-          Registramos a <strong>{form.nombre}</strong> como donante de sangre. Te avisaremos por email a <strong>{form.ownerEmail}</strong> cuando haya una solicitud compatible.
+          Registramos a <strong>{form.nombre}</strong>. La solicitud de alta quedó <strong>en evaluación</strong>: el administrador revisará los datos y la aceptará o rechazará. Te avisaremos por email a <strong>{form.ownerEmail}</strong>.
         </p>
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-700 mb-6">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800 mb-6">
           <p className="font-semibold mb-1">Próximos pasos:</p>
           <ul className="text-left space-y-1 list-disc list-inside">
-            <li>Revisá tu email para confirmar el registro</li>
-            <li>Un veterinario adherido verificará los datos de {form.nombre}</li>
-            <li>Te notificaremos cuando el perfil esté activo</li>
+            <li>El administrador evalúa la postulación (⏳ En evaluación)</li>
+            <li>Al ser <strong>aceptada</strong>, {form.nombre} pasa a estar disponible para donar</li>
+            <li>Cuando surja una solicitud compatible, te notificaremos automáticamente</li>
           </ul>
         </div>
         <div className="flex gap-3 justify-center">

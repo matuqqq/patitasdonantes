@@ -13,6 +13,8 @@ import VetDetalle from './pages/VetDetalle'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminVeterinarias from './pages/admin/AdminVeterinarias'
+import AdminDonantes from './pages/admin/AdminDonantes'
+import AdminSolicitudes from './pages/admin/AdminSolicitudes'
 
 function RequireAdmin({ children }) {
   const { adminUser } = useAuth()
@@ -44,7 +46,9 @@ export default function App() {
               </RequireAdmin>
             }
           >
-            <Route index element={<Navigate to="/admin/veterinarias" replace />} />
+            <Route index element={<Navigate to="/admin/donantes" replace />} />
+            <Route path="donantes" element={<AdminDonantes />} />
+            <Route path="solicitudes" element={<AdminSolicitudes />} />
             <Route path="veterinarias" element={<AdminVeterinarias />} />
           </Route>
         </Routes>

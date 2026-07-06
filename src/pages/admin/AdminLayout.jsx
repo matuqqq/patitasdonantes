@@ -1,6 +1,12 @@
-import { Outlet, Link, useNavigate } from 'react-router-dom'
-import { Droplets, Stethoscope, LogOut, ExternalLink } from 'lucide-react'
+import { Outlet, Link, NavLink, useNavigate } from 'react-router-dom'
+import { Droplets, Stethoscope, LogOut, ExternalLink, Heart, ClipboardList } from 'lucide-react'
 import { useAuth } from '../../context/AppContext'
+
+const NAV = [
+  { to: '/admin/donantes', label: 'Donantes', icon: Heart, color: 'text-rose-400' },
+  { to: '/admin/solicitudes', label: 'Solicitudes', icon: ClipboardList, color: 'text-orange-400' },
+  { to: '/admin/veterinarias', label: 'Veterinarias', icon: Stethoscope, color: 'text-teal-400' },
+]
 
 export default function AdminLayout() {
   const { adminUser, logout } = useAuth()
@@ -27,15 +33,22 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        <nav className="flex-1 p-3">
+        <nav className="flex-1 p-3 space-y-1">
           <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider px-2 mb-2">Gestión</p>
-          <Link
-            to="/admin/veterinarias"
-            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium bg-slate-800 text-white hover:bg-slate-700 transition-colors"
-          >
-            <Stethoscope size={16} className="text-teal-400" />
-            Veterinarias
-          </Link>
+          {NAV.map(({ to, label, icon: Icon, color }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  isActive ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`
+              }
+            >
+              <Icon size={16} className={color} />
+              {label}
+            </NavLink>
+          ))}
         </nav>
 
         <div className="p-3 border-t border-slate-700 space-y-1">

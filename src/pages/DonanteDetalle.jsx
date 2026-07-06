@@ -1,18 +1,21 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Phone, Mail, Droplets, Award, Shield, Calendar, Heart } from 'lucide-react'
-import { getDonorById, getCompatibleRequests, solicitudes, getVetById } from '../data'
+import { getCompatibleRequests } from '../data'
+import { useAppData } from '../context/AppContext'
 import RequestCard from '../components/RequestCard'
 
 const ESTADO_LABEL = {
   disponible: { text: '✅ Disponible para donar', cls: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
   en_evaluacion: { text: '⏳ En proceso de evaluación', cls: 'text-yellow-700 bg-yellow-50 border-yellow-200' },
   en_descanso: { text: '💤 En período de descanso (donó recientemente)', cls: 'text-slate-600 bg-slate-50 border-slate-200' },
+  rechazada: { text: '❌ Postulación rechazada', cls: 'text-rose-700 bg-rose-50 border-rose-200' },
 }
 
 export default function DonanteDetalle() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const donante = getDonorById(id)
+  const { donantes, solicitudes } = useAppData()
+  const donante = donantes.find((d) => d.id === Number(id))
 
   if (!donante) {
     return (
@@ -24,7 +27,7 @@ export default function DonanteDetalle() {
   }
 
   const compatibles = getCompatibleRequests(donante, solicitudes)
-  const estado = ESTADO_LABEL[donante.estado]
+  const estado = ESTADO_LABEL[donante.estado] || ESTADO_LABEL.en_evaluacion
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { MapPin, Clock, Droplets, AlertTriangle, Calendar } from 'lucide-react'
-import { getVetById } from '../data'
+import { useAppData } from '../context/AppContext'
 
 const URGENCIA = {
   urgente: { badge: 'badge-urgente', label: '🔴 Urgente', ring: 'border-l-4 border-l-rose-500' },
@@ -11,8 +11,9 @@ const URGENCIA = {
 const ESPECIE = { perro: '🐕', gato: '🐈' }
 
 export default function RequestCard({ solicitud }) {
+  const { veterinarias } = useAppData()
   const u = URGENCIA[solicitud.urgencia] || URGENCIA.programado
-  const vet = getVetById(solicitud.veterinariaId)
+  const vet = veterinarias.find((v) => v.id === Number(solicitud.veterinariaId))
 
   return (
     <div className={`card ${u.ring} hover:shadow-md transition-shadow`}>

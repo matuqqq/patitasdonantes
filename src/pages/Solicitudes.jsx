@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Filter, Plus } from 'lucide-react'
-import { solicitudes } from '../data'
+import { useAppData } from '../context/AppContext'
 import RequestCard from '../components/RequestCard'
 
 export default function Solicitudes() {
+  const { solicitudes } = useAppData()
   const [filtroUrgencia, setFiltroUrgencia] = useState('todas')
   const [filtroEspecie, setFiltroEspecie] = useState('todas')
   const [filtroSangre, setFiltroSangre] = useState('todas')

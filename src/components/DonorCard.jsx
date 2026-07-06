@@ -5,11 +5,13 @@ const ESTADO = {
   disponible: 'badge-disponible',
   en_evaluacion: 'badge-evaluacion',
   en_descanso: 'badge-descanso',
+  rechazada: 'badge-rechazada',
 }
 const ESTADO_LABEL = {
   disponible: '✅ Disponible',
   en_evaluacion: '⏳ En evaluación',
   en_descanso: '💤 En descanso',
+  rechazada: '❌ Rechazada',
 }
 
 export default function DonorCard({ donante }) {

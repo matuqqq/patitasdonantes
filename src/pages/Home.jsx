@@ -1,29 +1,32 @@
 import { Link } from 'react-router-dom'
 import { Droplets, Heart, MapPin, ArrowRight, CheckCircle, Bell, Users } from 'lucide-react'
-import { solicitudes, donantes, veterinarias } from '../data'
+import { useAppData } from '../context/AppContext'
 import RequestCard from '../components/RequestCard'
-
-const urgentes = solicitudes.filter((s) => s.urgencia === 'urgente').slice(0, 3)
 
 const pasos = [
   {
     icon: <Heart className="text-rose-600" size={28} />,
-    titulo: 'Registrá tu mascota',
-    desc: 'Completá el perfil de tu perro o gato donante con sus datos de salud y tipo de sangre.',
+    titulo: 'Registrá y validá tu mascota',
+    desc: 'Completá el perfil de tu perro o gato con sus datos de salud. El administrador evalúa la postulación y la acepta como donante.',
   },
   {
     icon: <Bell className="text-orange-500" size={28} />,
-    titulo: 'Recibí alertas',
-    desc: 'Te avisamos cuando hay una solicitud compatible con el tipo de sangre de tu mascota.',
+    titulo: 'Recibí alertas automáticas',
+    desc: 'El sistema cruza tipos de sangre y te notifica cuando hay una solicitud compatible con tu mascota.',
   },
   {
     icon: <CheckCircle className="text-emerald-500" size={28} />,
-    titulo: 'Coordiná la donación',
-    desc: 'Contactás directamente con la veterinaria y acordás el día y hora de la extracción.',
+    titulo: 'Coordiná y hacé el check-in',
+    desc: 'Contactás a la veterinaria, coordinás la transfusión y al realizarla se hace el check-in que cierra el caso.',
   },
 ]
 
 export default function Home() {
+  const { solicitudes, donantes, veterinarias } = useAppData()
+  const urgentes = solicitudes
+    .filter((s) => s.urgencia === 'urgente' && s.estado === 'activa')
+    .slice(0, 3)
+
   return (
     <div>
       {/* Hero */}

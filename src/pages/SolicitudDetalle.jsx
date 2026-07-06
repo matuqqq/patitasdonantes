@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, Phone, Mail, Calendar, Droplets, AlertTriangle, User } from 'lucide-react'
-import { getSolicitudById, getVetById, getCompatibleDonors, donantes } from '../data'
+import { ArrowLeft, MapPin, Phone, Mail, Calendar, Droplets, AlertTriangle, User, CheckCircle } from 'lucide-react'
+import { getCompatibleDonors } from '../data'
+import { useAppData } from '../context/AppContext'
 import DonorCard from '../components/DonorCard'
 
 const URGENCIA = {
@@ -14,7 +15,8 @@ const ESPECIE = { perro: '🐕', gato: '🐈' }
 export default function SolicitudDetalle() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const sol = getSolicitudById(id)
+  const { solicitudes, donantes, veterinarias, finalizarSolicitud } = useAppData()
+  const sol = solicitudes.find((s) => s.id === Number(id))
 
   if (!sol) {
     return (
@@ -25,9 +27,10 @@ export default function SolicitudDetalle() {
     )
   }
 
-  const vet = getVetById(sol.veterinariaId)
-  const u = URGENCIA[sol.urgencia]
+  const vet = veterinarias.find((v) => v.id === Number(sol.veterinariaId))
+  const u = URGENCIA[sol.urgencia] || URGENCIA.programado
   const compatibles = getCompatibleDonors(sol, donantes)
+  const finalizada = sol.estado === 'finalizada'
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -35,16 +38,29 @@ export default function SolicitudDetalle() {
         <ArrowLeft size={15} /> Volver
       </button>
 
-      <div className={`border rounded-xl p-4 mb-6 flex items-start gap-3 ${u.bg}`}>
-        <AlertTriangle size={20} className="text-rose-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <span className={`${u.badge} mb-1`}>{u.label}</span>
-          <p className="text-sm text-slate-700 mt-1">
-            Esta solicitud necesita sangre antes del{' '}
-            <strong>{new Date(sol.fechaNecesidad).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</strong>.
-          </p>
+      {finalizada ? (
+        <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-4 mb-6 flex items-start gap-3">
+          <CheckCircle size={20} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <span className="badge-disponible mb-1">✅ Caso finalizado</span>
+            <p className="text-sm text-slate-700 mt-1">
+              La transfusión fue coordinada y realizada. El check-in cerró esta solicitud
+              {sol.fechaCierre ? ` el ${new Date(sol.fechaCierre).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })}` : ''}.
+            </p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className={`border rounded-xl p-4 mb-6 flex items-start gap-3 ${u.bg}`}>
+          <AlertTriangle size={20} className="text-rose-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <span className={`${u.badge} mb-1`}>{u.label}</span>
+            <p className="text-sm text-slate-700 mt-1">
+              Esta solicitud necesita sangre antes del{' '}
+              <strong>{new Date(sol.fechaNecesidad).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</strong>.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="md:col-span-2">
@@ -108,28 +124,41 @@ export default function SolicitudDetalle() {
             </div>
           )}
           <div className="card p-4">
-            <h3 className="font-semibold text-slate-700 mb-3 text-sm">Contacto médico</h3>
+            <h3 className="font-semibold text-slate-700 mb-3 text-sm">Coordinación y contacto</h3>
             <div className="flex items-center gap-2 mb-2">
               <User size={14} className="text-slate-400" />
               <span className="text-sm text-slate-700">{sol.contacto}</span>
             </div>
+            <p className="text-xs text-slate-500 mb-3">
+              Coordiná la atención directamente con la veterinaria seleccionada. Una vez realizada la transfusión, hacé el check-in para cerrar el caso.
+            </p>
             <a
               href={`tel:${sol.telefono}`}
               className="btn-primary w-full justify-center text-sm"
             >
               <Phone size={14} /> Llamar ahora
             </a>
+            {!finalizada && (
+              <button
+                onClick={() => finalizarSolicitud(sol.id)}
+                className="w-full justify-center inline-flex items-center gap-2 border border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-semibold px-4 py-2 rounded-lg transition-colors text-sm mt-2"
+              >
+                <CheckCircle size={14} /> Check-in: transfusión realizada
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Donantes compatibles */}
+      {/* Donantes compatibles (motor de emparejamiento) */}
       <div>
         <h2 className="text-xl font-bold text-slate-800 mb-1">
           Donantes compatibles ({compatibles.length})
         </h2>
         <p className="text-sm text-slate-500 mb-4">
-          Estos donantes tienen sangre compatible con {sol.mascota} y están disponibles.
+          {finalizada
+            ? `El caso ya fue cerrado. Estos donantes aceptados eran compatibles con ${sol.mascota}.`
+            : `El sistema cruzó el tipo de sangre de ${sol.mascota} con la base de donantes aceptados y notificó a los compatibles disponibles.`}
         </p>
         {compatibles.length === 0 ? (
           <div className="text-center py-10 bg-white rounded-xl border border-slate-200 text-slate-500">
